@@ -1,0 +1,57 @@
+# Archlinux deployment on Akash Network! 🚀☁
+# This file is written in a Stack Definition Laguage (SDL)
+# https://docs.akash.network/readme/stack-definition-language
+
+---
+version: "2.0"
+
+services:
+  container:
+    image: archlinux:base-devel
+    env:
+      - |-
+        SSH_PUBKEYS=
+        ssh-XXX XXXXX user1
+        ssh-XXX XXXXX user2
+    command:
+      - bash
+      - -c
+    args:
+      - >-
+        echo Deploying Archlinux...;
+        pacman -Syu openssh --needed --noconfirm;
+        mkdir -p ~/.ssh;
+        touch ~/.ssh/authorized_keys;
+        chmod 600 ~/.ssh/authorized_keys;
+        echo -e "${SSH_PUBKEYS}" > ~/.ssh/authorized_keys;
+        ssh-keygen -A;
+        /usr/bin/sshd -D;
+    expose:
+      - port: 22
+        as: 22
+        to:
+          - global: true
+
+profiles:
+  compute:
+    container:
+      resources:
+        cpu:
+          units: 1
+        memory:
+          size: 4Gi
+        storage:
+          size: 8Gi
+
+  placement:
+    dcloud:
+      pricing:
+        container:
+          denom: uakt
+          amount: 100
+
+deployment:
+  container:
+    dcloud:
+      profile: container
+      count: 1
